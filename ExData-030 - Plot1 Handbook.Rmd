@@ -1,0 +1,133 @@
+---
+title: "EXDATA-030 PLOT1 Handbook"
+author: "zafbrb"
+date: "Friday, July 10, 2015"
+output: html_document
+---
+
+This is an R Markdown document. It has been compiled to document the Project 1 course work required for the Exploratory Dtaa Analysis course.    
+
+Using data from the **UC Irvine Machine Learning Repository**, we will 
+produce 4 plots showing how household energy usage varies over a 2 day 
+period
+
+#Codebook
+
+The data has been extracted from the **UC Irvine Machine Learning Repository**
+```
+The file is https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip
+1. Date: Date in format dd/mm/yyyy
+2. Time: time in format hh:mm:ss
+3. Global_active_power: household global minute-averaged active power (in kilowatt)
+4. Global_reactive_power: household global minute-averaged reactive power (in kilowatt)
+5. Voltage: minute-averaged voltage (in volt)
+6. Global_intensity: household global minute-averaged current intensity (in ampere)
+7. Sub_metering_1: energy sub-metering No. 1 (in watt-hour of active energy). It corresponds to the kitchen, containing mainly a dishwasher, an oven and a microwave (hot plates are not electric but gas powered).
+8. Sub_metering_2: energy sub-metering No. 2 (in watt-hour of active energy). It corresponds to the laundry room, containing a washing-machine, a tumble-drier, a refrigerator and a light.
+9. Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). It corresponds to an electric water-heater and an air-conditioner.
+```
+
+# Data Prep Code
+
+This portion of the code basically preps the data for exploratory plotting
+
+```{r}
+fileURL <- "G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1/household_power_consumption.txt"
+#lets read in the large file, remove NA's 
+energy1 <- read.table(fileURL, sep = ";", header = TRUE, na.strings= "?", stringsAsFactors = FALSE)
+#Set the date column to the correct class
+energy1$Date <- as.Date(energy1$Date, "%d/%m/%Y")
+# Get subset of larger data frame for the days in question
+energy2 <- subset(energy1, Date >= "2007-02-01" & Date <= "2007-02-02")
+#Clean up
+rm(energy1)
+# Create DateTimestamp column we can use for plotting
+dt <- paste(energy2$Date, energy2$Time)
+dt2 <- strptime(dt, "%Y-%m-%d %H:%M:%S", "GMT")
+#Show the shape of the dataframe
+str(energy2)
+```
+
+##Plot1 
+Code for plotting is shown below
+```
+par(mfrow=c(1,1))
+with(energy2, hist(Global_active_power, col="red", main = "Global Active Power"))
+```
+
+```{r, echo=FALSE}
+par(mfrow=c(1,1))
+    with(energy2, hist(Global_active_power, col="red", main = "Global Active Power"))
+```
+
+
+##Plot2 
+Code for plotting is shown below
+```
+par(mfrow=c(1,1))
+with(energy2, plot(dt2, Global_active_power, type="l", xlab = "Datetime",
+                       ylab = "Global Active Power (kilowatts)"))
+```
+```{r, echo=FALSE}
+par(mfrow=c(1,1))
+with(energy2, plot(dt2, Global_active_power, type="l", xlab = "Datetime",
+                       ylab = "Global Active Power (kilowatts)"))
+```
+
+##Plot3 
+Code for plotting is shown below
+```
+par(mfrow=c(1,1))
+plot(dt2, energy2$Sub_metering_1, type="n", ylab="Energy sub metering", xlab="")
+lines(dt2, energy2$Sub_metering_1, type="l", col="black")
+lines(dt2, energy2$Sub_metering_2, type="l", col="red")
+lines(dt2, energy2$Sub_metering_3, type="l", col="blue")
+legend("topright","", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), 
+       lwd=1, col=c("black", "red", "blue"))
+
+```
+```{r, echo=FALSE}
+    par(mfrow=c(1,1))
+    plot(dt2, energy2$Sub_metering_1, type="n", ylab="Energy sub metering", xlab="")
+    lines(dt2, energy2$Sub_metering_1, type="l", col="black")
+    lines(dt2, energy2$Sub_metering_2, type="l", col="red")
+    lines(dt2, energy2$Sub_metering_3, type="l", col="blue")
+    legend("topright","", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), 
+           lwd=1, col=c("black", "red", "blue"))
+    
+```
+
+##Plot4
+Code for plotting is shown below
+```
+par(mfrow = c(2,2))
+    with(energy2, {
+        plot(dt2, Global_active_power, type="l", xlab = "Datetime", 
+             ylab = "Global Active Power")
+        plot(dt2, Voltage, type="l", xlab = "Datetime", ylab="Voltage")
+        plot(dt2, energy2$Sub_metering_1, type="n", 
+             ylab="Energy sub metering", xlab="Datetime")
+        lines(dt2, energy2$Sub_metering_1, type="l", col="black")
+        lines(dt2, energy2$Sub_metering_2, type="l", col="red")
+        lines(dt2, energy2$Sub_metering_3, type="l", col="blue")
+        legend("topright","", c("Sub_metring_1", "Sub_metering_2", "Sub_metering_3"), 
+               lwd=1, col=c("black", "red", "blue"))
+        plot(dt2, Global_reactive_power, type="l", xlab="Datetime", ylab = "Global Reactive Power")
+    })    
+```
+```{r, echo=FALSE}
+par(mfrow = c(2,2))
+    with(energy2, {
+        plot(dt2, Global_active_power, type="l", xlab = "Datetime", 
+             ylab = "Global Active Power")
+        plot(dt2, Voltage, type="l", xlab = "Datetime", ylab="Voltage")
+        plot(dt2, energy2$Sub_metering_1, type="n", 
+             ylab="Energy sub metering", xlab="Datetime")
+        lines(dt2, energy2$Sub_metering_1, type="l", col="black")
+        lines(dt2, energy2$Sub_metering_2, type="l", col="red")
+        lines(dt2, energy2$Sub_metering_3, type="l", col="blue")
+        legend("topright","", c("Sub_metring_1", "Sub_metering_2", "Sub_metering_3"), 
+               lwd=1, col=c("black", "red", "blue"))
+        plot(dt2, Global_reactive_power, type="l", xlab="Datetime", ylab = "Global Reactive Power")
+    })    
+```
