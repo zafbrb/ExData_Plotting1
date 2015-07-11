@@ -60,7 +60,7 @@
     png(file="plot4.png", width=480, height=480)
 
     # Setup the lattice of plots (2x2)
-    par(mfrow = c(2,2))
+    par(mfrow = c(2,2), mar=c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
     with(energy2, {
         plot(dt2, Global_active_power, type="l", xlab = "Datetime", 
              ylab = "Global Active Power")
@@ -73,6 +73,7 @@
         legend("topright","", c("Sub_metring_1", "Sub_metering_2", "Sub_metering_3"), 
                lwd=1, col=c("black", "red", "blue"))
         plot(dt2, Global_reactive_power, type="l", xlab="Datetime", ylab = "Global Reactive Power")
+        mtext("Exploratory Data Analysis - Project 1 Plotting", outer = TRUE)
     })    
     # Close off the device
     dev.off()
