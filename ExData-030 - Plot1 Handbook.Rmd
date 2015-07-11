@@ -5,7 +5,9 @@ date: "Friday, July 10, 2015"
 output: html_document
 ---
 
-This is an R Markdown document. It has been compiled to document the Project 1 course work required for the Exploratory Dtaa Analysis course.    
+This is an R Markdown document. It has been compiled to document the Project 1 course work required for the Exploratory Dtaa Analysis course.  
+
+To preview this on Github goto this address **http://htmlpreview.github.io/** and put in the web address of this html file on github. 
 
 Using data from the **UC Irvine Machine Learning Repository**, we will 
 produce 4 plots showing how household energy usage varies over a 2 day 
@@ -29,9 +31,27 @@ The file is https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_powe
 
 # Data Prep Code
 
-This portion of the code basically preps the data for exploratory plotting
+This portion of the code basically preps the data for exploratory plotting. The Plotx.R scripts have slightly more advanced code to check to see if the file exists and if not, download it from the internet
 
-```{r}
+
+```
+fileURL <- "household_power_consumption.txt"
+#lets read in the large file, remove NA's 
+energy1 <- read.table(fileURL, sep = ";", header = TRUE, na.strings= "?", stringsAsFactors = FALSE)
+#Set the date column to the correct class
+energy1$Date <- as.Date(energy1$Date, "%d/%m/%Y")
+# Get subset of larger data frame for the days in question
+energy2 <- subset(energy1, Date >= "2007-02-01" & Date <= "2007-02-02")
+#Clean up
+rm(energy1)
+# Create DateTimestamp column we can use for plotting
+dt <- paste(energy2$Date, energy2$Time)
+dt2 <- strptime(dt, "%Y-%m-%d %H:%M:%S", "GMT")
+#Show the shape of the dataframe
+str(energy2)
+```
+
+```{r, echo=FALSE}
 fileURL <- "G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1/household_power_consumption.txt"
 #lets read in the large file, remove NA's 
 energy1 <- read.table(fileURL, sep = ";", header = TRUE, na.strings= "?", stringsAsFactors = FALSE)
@@ -62,7 +82,14 @@ par(mfrow=c(1,1))
 
 
 ##Plot2 
-Code for plotting is shown below
+Code for plotting is shown below. This plot requires the DateTime stamp column of data (dt2). the strptime() will create a data + time stamp  
+
+```
+# Need to create a Date/Timestamp column for this plot
+    dt <- paste(energy2$Date, energy2$Time)
+    dt2 <- strptime(dt, "%Y-%m-%d %H:%M:%S", "GMT")
+```
+You will notice that I did not put this back to the data frame(as a extra column)...normally that would be better practise. 
 ```
 par(mfrow=c(1,1))
 with(energy2, plot(dt2, Global_active_power, type="l", xlab = "Datetime",
@@ -75,7 +102,7 @@ with(energy2, plot(dt2, Global_active_power, type="l", xlab = "Datetime",
 ```
 
 ##Plot3 
-Code for plotting is shown below
+Code for plotting is shown below. Notice we create a legend for this plot. Trying to save the screen plot and copying it to the PNG file always seemed to truncate the legend text. I found that writing the plot directly to a PNG file using PNG(file="name", width=480 , height=480) gave the correct result
 ```
 par(mfrow=c(1,1))
 plot(dt2, energy2$Sub_metering_1, type="n", ylab="Energy sub metering", xlab="")
@@ -98,7 +125,7 @@ legend("topright","", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"),
 ```
 
 ##Plot4
-Code for plotting is shown below
+Code for plotting is shown below. Again the better approach was to write this directly to the PNG device.
 ```
 par(mfrow = c(2,2))
     with(energy2, {
@@ -131,3 +158,54 @@ par(mfrow = c(2,2))
         plot(dt2, Global_reactive_power, type="l", xlab="Datetime", ylab = "Global Reactive Power")
     })    
 ```
+
+
+
+##Improvements
+
+Its good to think about improvements
+
+1. Add the DateTime stamp back to the energy2 dataframe as an extra column
+2. Encapsulate the data reading and subsetting code into a function so it can be re-used
+3. Save the subsetted file to local storage and use that to read in for each plot
+
+
+##Test Harness
+
+The R script file **test_plot.R** will run all PLOT files. Assumes all the PLOTx.R files are in the working directory
+
+Output example from test harness run
+```
+> plot_test()
+*** Plot1 starting *** 
+[Plot1] Checking if data is already present in local directory...
+ [Plot1] Data not present - downloading from Internet...hold on 
+trying URL 'https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip'
+Content type 'application/zip' length 20640916 bytes (19.7 Mb)
+opened URL
+downloaded 19.7 Mb
+
+[Plot1] Unpacked date source files into  G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1 
+[Plot1] Reading large dataset - this may take a while...Done! 
+[Plot1] Plotting... 
+[Plot1] Plot written to plot1.png in local directory G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1 
+*** Plot1 completed *** 
+*** Plot2 starting *** 
+[Plot2] Checking if data is already present in local directory...Data present - using local content 
+[Plot2] Reading large dataset - this may take a while...Done! 
+[Plot2] Plotting... 
+[Plot2] Plot written to Plot2.png in local directory G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1 
+*** Plot2 completed *** 
+*** Plot3 starting *** 
+[Plot3] Checking if data is already present in local directory...Data present - using local content 
+[Plot3] Reading large dataset - this may take a while...Done! 
+[Plot3] Plotting... 
+[Plot3] Plot written to Plot3.png in local directory G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1 
+*** Plot3 completed *** 
+*** Plot4 starting *** 
+[Plot4] Checking if data is already present in local directory...Data present - using local content 
+[Plot4] Reading large dataset - this may take a while...Done! 
+[Plot4] Plot written to Plot4.png in local directory G:/Learning/Data Scientist/DataExpWeek1/Data Explore Week 1 
+*** Plot4 completed *** 
+```
+
